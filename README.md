@@ -12,7 +12,7 @@ $ ansible-playbook ansible/install.yml -i ansible/hosts
 
 ---
 
-Build Container Application
+Build Container Application (repository is here: https://hub.docker.com/r/hiogawa/ruby_test_app/)
 
 ```
 $ docker build -t hiogawa/ruby_test_app ./app
