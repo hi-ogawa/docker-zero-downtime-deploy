@@ -1,0 +1,5 @@
+.vagrant
+Vagrantfile
+
+ansible/roles
+ansible/hosts

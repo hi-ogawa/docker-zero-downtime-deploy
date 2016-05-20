@@ -1,0 +1,10 @@
+---
+app0:
+  port: 3333
+app1:
+  port: 4444
+
+haproxy:
+  stats:
+    username: someone
+    password: seccret

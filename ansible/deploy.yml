@@ -1,0 +1,42 @@
+---
+- hosts: all
+  user: ubuntu
+  become: yes
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: make sure haproxy is running
+      service: name=haproxy state=started
+
+    - name: pull latest image
+      command: docker pull hiogawa/ruby_test_app
+
+    - name: stop 1st container if exists
+      shell: docker stop app0 && docker rm app0
+      args:
+        executable: /bin/bash
+      ignore_errors: yes
+
+    - name: run 1st container
+      command: >
+               docker run --name app0 --restart=always -d -p {{ app0.port }}:{{ app0.port }}
+               hiogawa/ruby_test_app /bin/bash -c "bundle exec puma config.ru -p {{ app0.port }}"
+
+    - name: wait until 1st container is ready
+      command: curl --head http://127.0.0.1:{{ app0.port }}
+      register: result
+      until: result.stdout.find("200 OK") != -1
+      retries: 30
+      delay: 5
+
+    - name: stop 2nd container if exists
+      shell: docker stop app1 && docker rm app1
+      args:
+        executable: /bin/bash
+      ignore_errors: yes
+
+    - name: run 2nd container
+      command: >
+               docker run --name app1 --restart=always -d -p {{ app1.port }}:{{ app1.port }}
+               hiogawa/ruby_test_app /bin/bash -c "bundle exec puma config.ru -p {{ app1.port }}"

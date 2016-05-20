@@ -1,0 +1,33 @@
+---
+- hosts: all
+  user: ubuntu
+  become: yes
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: apt-get update
+      apt: update_cache=yes cache_valid_time=360000
+
+    - name: install haproxy
+      apt: name=haproxy state=present
+
+    - name: enable haproxy service command
+      shell: echo 'ENABLED=1' > /etc/default/haproxy
+      args:
+        executable: /bin/bash
+
+    - name: set haproxy config file
+      template: src=templates/haproxy.cfg.j2
+                dest=/etc/haproxy/haproxy.cfg
+      notify:
+        - restart haproxy
+
+  handlers:
+    - name: restart haproxy
+      service: name=haproxy state=restarted
+
+  roles:
+    - role: 'hi-ogawa.docker'
+      docker_group:
+        - ubuntu
